@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jogo do Supermercado</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <h1>Caça aos Produtos</h1>
+        <p>Encontre todos os itens da lista antes que o tempo acabe!</p>
+      </header>
+      <main class="layout">
+        <section class="panel shopping-panel">
+          <h2>Lista de compras</h2>
+          <p class="panel-helper">
+            São cinco produtos diferentes. Escolha um tempo e clique em
+            "Iniciar jogo" para começar uma nova rodada.
+          </p>
+          <div class="field">
+            <label for="time-input">Duração da rodada (segundos)</label>
+            <input
+              id="time-input"
+              class="number-input"
+              type="number"
+              min="5"
+              max="600"
+              step="5"
+              value="20"
+              inputmode="numeric"
+            />
+          </div>
+          <ol id="shopping-list" class="shopping-list"></ol>
+          <button id="start-button" class="primary-button" type="button">
+            Iniciar jogo
+          </button>
+        </section>
+        <section class="panel shelf-panel">
+          <div class="shelf" aria-label="Prateleira de produtos">
+            <div id="shelf-grid" class="shelf-grid"></div>
+          </div>
+        </section>
+        <section class="panel timer-panel">
+          <h2>Tempo restante</h2>
+          <div id="timer" class="timer">00:20</div>
+          <p id="status-message" class="status-message"></p>
+        </section>
+      </main>
+    </div>
+    <div
+      id="result-modal"
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-hidden="true"
+      aria-labelledby="modal-title"
+      aria-describedby="modal-message"
+      hidden
+    >
+      <div class="modal-overlay" data-dismiss-modal></div>
+      <div id="modal-content" class="modal-content" role="document">
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Fechar resultado"
+          data-dismiss-modal
+        >
+          &times;
+        </button>
+        <div class="modal-body">
+          <h2 id="modal-title">Rodada finalizada</h2>
+          <p id="modal-message">
+            Veja como você se saiu e tente novamente para melhorar seu tempo!
+          </p>
+          <ul
+            id="modal-summary"
+            class="modal-summary"
+            aria-label="Resumo da rodada"
+          ></ul>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="ghost-button" data-dismiss-modal>
+            Fechar
+          </button>
+          <button type="button" id="modal-play-again" class="primary-button">
+            Jogar novamente
+          </button>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
