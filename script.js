@@ -27,6 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const productsContainer = document.querySelector('#products');
   const timerInput = document.querySelector('#timer-input');
   const cartStackElement = document.querySelector('#cart-stack');
+  const endModal = document.querySelector('#end-modal');
+  const modalTitleElement = document.querySelector('#modal-title');
+  const modalDescriptionElement = document.querySelector('#modal-description');
+  const modalRestartButton = document.querySelector('#modal-restart');
+  const modalCloseButton = document.querySelector('#modal-close');
 
   let targets = [];
   let targetIds = new Set();
@@ -36,6 +41,32 @@ document.addEventListener('DOMContentLoaded', () => {
   let isGameActive = false;
 
   restartButton.addEventListener('click', initializeGame);
+
+  if (modalRestartButton) {
+    modalRestartButton.addEventListener('click', () => {
+      hideEndModal();
+      initializeGame();
+    });
+  }
+
+  if (modalCloseButton) {
+    modalCloseButton.addEventListener('click', hideEndModal);
+  }
+
+  if (endModal) {
+    endModal.addEventListener('click', (event) => {
+      if (event.target === endModal) {
+        hideEndModal();
+      }
+    });
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && isModalVisible()) {
+      event.preventDefault();
+      hideEndModal();
+    }
+  });
 
   if (timerInput) {
     timerInput.addEventListener('change', () => {
@@ -57,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeGame();
 
   function initializeGame() {
+    hideEndModal();
     clearInterval(countdownId);
     countdownId = null;
     targets = getRandomProducts(ALL_PRODUCTS, SHOPPING_LIST_SIZE);
@@ -185,6 +217,8 @@ document.addEventListener('DOMContentLoaded', () => {
       updateStatus('Tempo esgotado! Tente novamente para completar a lista.', 'error');
       markMissingItems();
     }
+
+    showEndModal(playerWon);
   }
 
   function disableProducts() {
@@ -264,6 +298,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     timerInput.value = sanitized.toString();
     return sanitized;
+  }
+
+  function showEndModal(playerWon) {
+    if (!endModal) {
+      return;
+    }
+
+    const body = document.body;
+    if (body) {
+      body.classList.add('modal-open');
+    }
+
+    endModal.classList.remove('hidden', 'win', 'lose');
+    endModal.setAttribute('aria-hidden', 'false');
+    endModal.classList.add(playerWon ? 'win' : 'lose');
+
+    if (modalTitleElement) {
+      modalTitleElement.textContent = playerWon ? 'Você venceu!' : 'Tempo esgotado!';
+    }
+
+    if (modalDescriptionElement) {
+      const collected = foundTargets.size;
+      const total = targetIds.size;
+      modalDescriptionElement.textContent = playerWon
+        ? 'Você encontrou todos os itens da lista dentro do tempo. Pronto para outra rodada?'
+        : `Você encontrou ${collected} de ${total} itens. Clique em "Jogar novamente" para tentar outra vez!`;
+    }
+
+    const focusTarget = modalRestartButton || modalCloseButton;
+    if (focusTarget) {
+      window.setTimeout(() => focusTarget.focus(), 0);
+    }
+  }
+
+  function hideEndModal() {
+    if (!endModal) {
+      return;
+    }
+
+    endModal.classList.add('hidden');
+    endModal.setAttribute('aria-hidden', 'true');
+    if (document.body) {
+      document.body.classList.remove('modal-open');
+    }
+  }
+
+  function isModalVisible() {
+    return Boolean(endModal && !endModal.classList.contains('hidden'));
   }
 
   function resetCartStack() {

@@ -28,8 +28,8 @@
         <input id="timer-input" class="timer-input" type="number" min="5" max="600" step="5" value="20">
       </div>
       <div class="timer-display" aria-live="polite"><span id="timer-value">20</span>s</div>
-      <button id="restart-btn" type="button" class="restart-button" aria-label="Jogar">
-        <span class="sr-only">Jogar</span>
+      <button id="restart-btn" type="button" class="restart-button" aria-label="Iniciar jogo">
+        <span class="sr-only">Iniciar jogo</span>
         <div class="cart-visual">
           <div id="cart-stack" class="cart-stack" aria-hidden="true"></div>
           <img src="imagens/carrinho-de-compras.jpeg" alt="" class="cart-icon" loading="lazy" aria-hidden="true">
@@ -37,6 +37,26 @@
       </button>
       <p class="hint">Defina o tempo e clique no carrinho para começar uma nova rodada.</p>
     </section>
+  </div>
+
+  <div
+    id="end-modal"
+    class="modal-overlay hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
+    aria-describedby="modal-description"
+    aria-hidden="true"
+  >
+    <div class="modal-card" role="document">
+      <button type="button" id="modal-close" class="modal-close" aria-label="Fechar">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <div class="modal-graphic" aria-hidden="true"></div>
+      <h2 id="modal-title" class="modal-title"></h2>
+      <p id="modal-description" class="modal-description"></p>
+      <button type="button" id="modal-restart" class="modal-primary">Jogar novamente</button>
+    </div>
   </div>
 
   <script src="script.js" defer></script>

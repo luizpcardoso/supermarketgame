@@ -359,6 +359,149 @@ body {
   color: rgba(15, 42, 67, 0.6);
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.2rem, 4vw, 2.5rem);
+  background: rgba(15, 42, 67, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--transition), visibility var(--transition);
+}
+
+.modal-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.modal-card {
+  position: relative;
+  width: min(420px, 100%);
+  border-radius: 24px;
+  background: var(--card-bg);
+  box-shadow: 0 26px 58px var(--shadow-strong);
+  padding: clamp(1.8rem, 4vw, 2.6rem);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2.5vw, 1.4rem);
+  transform: translateY(0);
+  transition: transform var(--transition);
+}
+
+.modal-overlay.hidden .modal-card {
+  transform: translateY(12px);
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  color: rgba(15, 42, 67, 0.55);
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: color var(--transition);
+}
+
+.modal-close:hover,
+.modal-close:focus-visible {
+  color: rgba(15, 42, 67, 0.85);
+  outline: none;
+}
+
+.modal-graphic {
+  width: clamp(92px, 18vw, 120px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 20px 36px rgba(15, 42, 67, 0.2);
+  color: #ffffff;
+  font-size: clamp(2.4rem, 5vw, 3rem);
+}
+
+.modal-graphic::before {
+  content: "";
+}
+
+.modal-overlay.win .modal-graphic {
+  background: linear-gradient(135deg, rgba(46, 157, 97, 0.85), var(--success-color));
+}
+
+.modal-overlay.win .modal-graphic::before {
+  content: "✔";
+}
+
+.modal-overlay.lose .modal-graphic {
+  background: linear-gradient(135deg, rgba(214, 69, 80, 0.85), var(--error-color));
+}
+
+.modal-overlay.lose .modal-graphic::before {
+  content: "⏰";
+}
+
+.modal-title {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 1.9rem);
+  color: var(--text-color);
+}
+
+.modal-description {
+  margin: 0;
+  color: rgba(15, 42, 67, 0.75);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.modal-primary {
+  border: none;
+  border-radius: 18px;
+  padding: 0.75rem 1.6rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2675f8, #47b5ff);
+  cursor: pointer;
+  box-shadow: 0 18px 32px rgba(38, 117, 248, 0.35);
+  transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+}
+
+.modal-primary:hover,
+.modal-primary:focus-visible {
+  outline: none;
+  transform: translateY(-2px);
+  box-shadow: 0 22px 38px rgba(38, 117, 248, 0.45);
+}
+
+.modal-primary:active {
+  transform: translateY(0);
+}
+
+.modal-overlay.win .modal-primary {
+  background: linear-gradient(135deg, rgba(46, 157, 97, 0.85), var(--success-color));
+  box-shadow: 0 18px 32px rgba(46, 157, 97, 0.35);
+}
+
+.modal-overlay.lose .modal-primary {
+  background: linear-gradient(135deg, rgba(214, 69, 80, 0.85), var(--error-color));
+  box-shadow: 0 18px 32px rgba(214, 69, 80, 0.35);
+}
+
 @media (max-width: 1100px) {
   .game {
     flex-direction: column;
