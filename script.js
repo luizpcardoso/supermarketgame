@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const restartButton = document.querySelector('#restart-btn');
   const productsContainer = document.querySelector('#products');
   const timerInput = document.querySelector('#timer-input');
-  const cartStackElement = document.querySelector('#cart-stack');
   const endModal = document.querySelector('#end-modal');
   const modalTitleElement = document.querySelector('#modal-title');
   const modalDescriptionElement = document.querySelector('#modal-description');
@@ -100,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateTimerDisplay();
     renderShoppingList();
     renderProducts();
-    resetCartStack();
     updateStatus('Clique nos produtos da lista para adicioná-los ao carrinho.');
 
     startCountdown();
@@ -164,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (targetIds.has(productId)) {
       foundTargets.add(productId);
       markButtonsAsFound(productId);
-      addProductToCart(productId);
 
       const listItem = shoppingListElement.querySelector(`li[data-product-id="${productId}"]`);
       if (listItem) {
@@ -346,35 +343,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function isModalVisible() {
     return Boolean(endModal && !endModal.classList.contains('hidden'));
-  }
-
-  function resetCartStack() {
-    if (!cartStackElement) {
-      return;
-    }
-    cartStackElement.innerHTML = '';
-  }
-
-  function addProductToCart(productId) {
-    if (!cartStackElement) {
-      return;
-    }
-    const product = ALL_PRODUCTS.find((item) => item.id === productId);
-    if (!product) {
-      return;
-    }
-
-    const cartItem = document.createElement('img');
-    cartItem.src = product.image;
-    cartItem.alt = '';
-    cartItem.loading = 'lazy';
-    cartItem.setAttribute('aria-hidden', 'true');
-
-    const stackIndex = cartStackElement.childElementCount;
-    cartItem.style.setProperty('--stack-index', stackIndex.toString());
-    cartItem.style.zIndex = (stackIndex + 1).toString();
-
-    cartStackElement.append(cartItem);
   }
 
   function getRandomProducts(products, amount) {

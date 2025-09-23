@@ -290,67 +290,35 @@ body {
 
 .restart-button {
   margin-top: auto;
-  background: none;
+  padding: 0.85rem 1.6rem;
   border: none;
-  padding: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f09c2f, #f18805);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 16px 32px rgba(240, 156, 47, 0.35);
   cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+}
+
+.restart-button:hover,
+.restart-button:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 40px rgba(240, 156, 47, 0.45);
+  filter: brightness(1.05);
 }
 
 .restart-button:focus-visible {
-  outline: none;
+  outline: 3px solid rgba(240, 156, 47, 0.4);
+  outline-offset: 4px;
 }
 
-.restart-button .cart-visual {
-  position: relative;
-  width: clamp(170px, 20vw, 230px);
-  aspect-ratio: 1.2;
-  border-radius: 30px;
-  background: linear-gradient(135deg, rgba(240, 156, 47, 0.3), rgba(38, 117, 248, 0.3));
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  overflow: hidden;
-  padding-bottom: clamp(0.6rem, 1.8vw, 1.1rem);
-  box-shadow: 0 18px 36px rgba(15, 42, 67, 0.22);
-  transition: transform var(--transition), box-shadow var(--transition);
-}
-
-.restart-button:hover .cart-visual,
-.restart-button:focus-visible .cart-visual {
-  transform: translateY(-6px);
-  box-shadow: 0 24px 44px rgba(15, 42, 67, 0.28);
-}
-
-.restart-button:active .cart-visual {
+.restart-button:active {
   transform: translateY(0);
-}
-
-.cart-icon {
-  width: clamp(120px, 68%, 160px);
-  height: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 16px 24px rgba(15, 42, 67, 0.24));
-  pointer-events: none;
-}
-
-.cart-stack {
-  position: absolute;
-  bottom: 52%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 72%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(0.12rem, 0.6vw, 0.35rem);
-  pointer-events: none;
-}
-
-.cart-stack img {
-  width: clamp(52px, 52%, 84px);
-  object-fit: contain;
-  filter: drop-shadow(0 12px 20px rgba(15, 42, 67, 0.3));
-  transform: translateY(calc(-8px * var(--stack-index, 0)));
+  box-shadow: 0 12px 24px rgba(240, 156, 47, 0.35);
 }
 
 .hint {
