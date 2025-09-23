@@ -26,6 +26,13 @@ const timerElement = document.getElementById("timer");
 const statusMessage = document.getElementById("status-message");
 const startButton = document.getElementById("start-button");
 const timeInput = document.getElementById("time-input");
+const resultModal = document.getElementById("result-modal");
+const modalContent = document.getElementById("modal-content");
+const modalTitle = document.getElementById("modal-title");
+const modalMessage = document.getElementById("modal-message");
+const modalSummary = document.getElementById("modal-summary");
+const modalPlayAgainButton = document.getElementById("modal-play-again");
+const modalDismissElements = document.querySelectorAll("[data-dismiss-modal]");
 const startButtonDefaultLabel = startButton.textContent.trim();
 
 let activeTargets = [];
@@ -131,6 +138,8 @@ function startRound() {
     return;
   }
 
+  closeResultModal({ restoreFocus: false });
+
   const duration = sanitizeDuration(timeInput.value);
   timeInput.value = duration;
 
@@ -209,15 +218,95 @@ function finishRound(playerWon) {
   setRoundControlsActive(false);
 
   const message = playerWon
-    ? "Parabéns! Você encontrou todos os itens a tempo."
-    : "O tempo acabou! Tente novamente.";
+    ? "Excelente trabalho! Você encontrou todos os itens a tempo."
+    : 'O tempo acabou! Clique em "Jogar novamente" para tentar outra vez.';
   statusMessage.textContent = message;
 
   shelfGrid
     .querySelectorAll(".product-card")
     .forEach((button) => button.setAttribute("aria-disabled", "true"));
+  openResultModal(playerWon);
+}
 
-  startButton.focus({ preventScroll: true });
+function isModalOpen() {
+  return resultModal && !resultModal.hasAttribute("hidden");
+}
+
+function closeResultModal({ restoreFocus = true } = {}) {
+  if (!resultModal || !isModalOpen()) {
+    return;
+  }
+
+  resultModal.setAttribute("aria-hidden", "true");
+  resultModal.setAttribute("hidden", "");
+  document.body.classList.remove("modal-open");
+
+  if (restoreFocus) {
+    startButton.focus({ preventScroll: true });
+  }
+}
+
+function openResultModal(playerWon) {
+  if (!resultModal) {
+    return;
+  }
+
+  const missingCount = activeTargets.length - foundTargets.size;
+  const hasPartialFinds = foundTargets.size > 0 && missingCount > 0;
+
+  if (modalContent) {
+    modalContent.dataset.result = playerWon ? "win" : "lose";
+  }
+
+  if (modalTitle) {
+    modalTitle.textContent = playerWon
+      ? "Você venceu!"
+      : "Tempo esgotado";
+  }
+
+  if (modalMessage) {
+    if (playerWon) {
+      modalMessage.textContent =
+        "Excelente! Você encontrou todos os itens da lista dentro do tempo.";
+    } else if (missingCount === 0) {
+      modalMessage.textContent =
+        "Você encontrou todos os itens, mas o cronômetro chegou ao fim.";
+    } else {
+      const itemLabel = missingCount === 1 ? "item" : "itens";
+      modalMessage.textContent = hasPartialFinds
+        ? `Faltou ${missingCount} ${itemLabel} para completar a lista.`
+        : "O tempo acabou antes de encontrar algum item. Que tal tentar outra vez?";
+    }
+  }
+
+  if (modalSummary) {
+    modalSummary.innerHTML = "";
+    activeTargets.forEach((product) => {
+      const listItem = document.createElement("li");
+      const isFound = foundTargets.has(product.id);
+
+      listItem.className = isFound ? "found" : "missing";
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "modal-summary-name";
+      nameSpan.textContent = product.name;
+
+      const statusSpan = document.createElement("span");
+      statusSpan.className = "modal-summary-status";
+      statusSpan.textContent = isFound ? "Encontrado" : "Faltou";
+
+      listItem.append(nameSpan, statusSpan);
+      modalSummary.appendChild(listItem);
+    });
+  }
+
+  resultModal.removeAttribute("hidden");
+  resultModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+
+  if (modalPlayAgainButton) {
+    modalPlayAgainButton.focus({ preventScroll: true });
+  }
 }
 
 startButton.addEventListener("click", () => {
@@ -232,6 +321,26 @@ timeInput.addEventListener("change", () => {
     roundDuration = sanitized;
     timeRemaining = sanitized;
     updateTimerDisplay();
+  }
+});
+
+modalDismissElements.forEach((element) => {
+  element.addEventListener("click", () => {
+    closeResultModal();
+  });
+});
+
+if (modalPlayAgainButton) {
+  modalPlayAgainButton.addEventListener("click", () => {
+    closeResultModal({ restoreFocus: false });
+    startRound();
+  });
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && isModalOpen()) {
+    event.preventDefault();
+    closeResultModal();
   }
 });
 

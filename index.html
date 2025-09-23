@@ -49,6 +49,47 @@
         </section>
       </main>
     </div>
+    <div
+      id="result-modal"
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-hidden="true"
+      aria-labelledby="modal-title"
+      aria-describedby="modal-message"
+      hidden
+    >
+      <div class="modal-overlay" data-dismiss-modal></div>
+      <div id="modal-content" class="modal-content" role="document">
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Fechar resultado"
+          data-dismiss-modal
+        >
+          &times;
+        </button>
+        <div class="modal-body">
+          <h2 id="modal-title">Rodada finalizada</h2>
+          <p id="modal-message">
+            Veja como você se saiu e tente novamente para melhorar seu tempo!
+          </p>
+          <ul
+            id="modal-summary"
+            class="modal-summary"
+            aria-label="Resumo da rodada"
+          ></ul>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="ghost-button" data-dismiss-modal>
+            Fechar
+          </button>
+          <button type="button" id="modal-play-again" class="primary-button">
+            Jogar novamente
+          </button>
+        </div>
+      </div>
+    </div>
     <script src="script.js"></script>
   </body>
 </html>

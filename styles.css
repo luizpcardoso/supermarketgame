@@ -1,20 +1,20 @@
 :root {
-  --bg-color: #ffe3f4;
-  --bg-highlight: #ffeacb;
-  --bg-contrast: #c9f7ff;
+  --bg-color: #f4f7ff;
+  --bg-highlight: #fff4d6;
+  --bg-contrast: #ffe4e4;
   --panel-bg: linear-gradient(
-    155deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 228, 248, 0.9) 48%,
-    rgba(222, 252, 255, 0.9) 100%
+    160deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(244, 248, 255, 0.94) 55%,
+    rgba(255, 240, 208, 0.92) 100%
   );
-  --accent: #ff5d8f;
-  --accent-dark: #f2366c;
-  --accent-alt: #3ddad7;
-  --accent-alt-dark: #1fb0a7;
-  --text-primary: #1c1646;
-  --text-muted: #665a8f;
-  --shadow: 0 22px 50px -28px rgba(88, 26, 118, 0.55);
+  --accent: #0056b3;
+  --accent-dark: #003b82;
+  --accent-alt: #ffba08;
+  --accent-alt-dark: #d62828;
+  --text-primary: #1f2a44;
+  --text-muted: #53627a;
+  --shadow: 0 22px 46px -28px rgba(0, 52, 128, 0.4);
   --radius-lg: 22px;
   --radius-md: 16px;
   font-family: "Poppins", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -29,13 +29,17 @@ body {
   height: 100vh;
   overflow: hidden;
   background: radial-gradient(
-    circle at 12% 10%,
-    #fff8fb 0%,
-    var(--bg-color) 36%,
-    var(--bg-highlight) 70%,
+    circle at 18% 12%,
+    #ffffff 0%,
+    var(--bg-color) 38%,
+    var(--bg-highlight) 72%,
     var(--bg-contrast) 100%
   );
   color: var(--text-primary);
+}
+
+body.modal-open {
+  overflow: hidden !important;
 }
 
 .app {
@@ -51,15 +55,15 @@ body {
 .topbar {
   text-align: center;
   background: linear-gradient(
-    140deg,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 226, 247, 0.95) 60%,
-    rgba(221, 249, 255, 0.92) 100%
+    135deg,
+    rgba(255, 255, 255, 0.94) 0%,
+    rgba(240, 247, 255, 0.94) 52%,
+    rgba(255, 243, 215, 0.92) 100%
   );
   border-radius: var(--radius-lg);
   padding: 20px 28px;
   box-shadow: var(--shadow);
-  border: 1px solid rgba(255, 93, 143, 0.18);
+  border: 1px solid rgba(0, 86, 179, 0.16);
 }
 
 .topbar h1 {
@@ -88,7 +92,7 @@ body {
   border-radius: var(--radius-lg);
   padding: 22px 24px;
   box-shadow: var(--shadow);
-  border: 1px solid rgba(255, 93, 143, 0.14);
+  border: 1px solid rgba(0, 86, 179, 0.12);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -99,7 +103,7 @@ body {
 .panel h2 {
   margin: 0;
   font-size: 1.4rem;
-  color: var(--accent);
+  color: var(--accent-dark);
 }
 
 .panel-helper {
@@ -117,25 +121,25 @@ body {
 .field label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--accent-dark);
 }
 
 .number-input {
   width: 100%;
-  border: 1px solid rgba(255, 93, 143, 0.28);
+  border: 1px solid rgba(0, 86, 179, 0.22);
   border-radius: 12px;
   padding: 10px 14px;
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.82);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .number-input:focus {
   outline: none;
-  border-color: var(--accent-alt);
-  box-shadow: 0 0 0 3px rgba(61, 218, 215, 0.3);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 186, 8, 0.35);
 }
 
 .number-input::-webkit-outer-spin-button,
@@ -160,7 +164,7 @@ body {
 
 .shopping-list li.found {
   text-decoration: line-through;
-  color: var(--accent-alt-dark);
+  color: var(--accent);
 }
 
 .primary-button {
@@ -169,19 +173,19 @@ body {
   border: none;
   border-radius: 999px;
   padding: 14px 22px;
-  background: linear-gradient(135deg, var(--accent) 0%, #ff8aa8 48%, var(--accent-alt) 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, #1f6de4 42%, var(--accent-alt) 100%);
   color: #fff;
   font-weight: 700;
   letter-spacing: 0.02em;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 12px 24px -14px rgba(255, 93, 143, 0.8);
+  box-shadow: 0 12px 24px -14px rgba(0, 86, 179, 0.55);
 }
 
 .primary-button:hover,
 .primary-button:focus-visible {
   transform: translateY(-1px);
-  box-shadow: 0 12px 28px -14px rgba(61, 218, 215, 0.6);
+  box-shadow: 0 14px 32px -14px rgba(0, 86, 179, 0.55);
   outline: none;
 }
 
@@ -202,7 +206,7 @@ body {
   letter-spacing: 0.08em;
   text-align: center;
   color: var(--accent);
-  text-shadow: 0 6px 18px rgba(255, 93, 143, 0.35);
+  text-shadow: 0 6px 18px rgba(0, 86, 179, 0.3);
 }
 
 .status-message {
@@ -259,15 +263,15 @@ body {
 
 .product-placeholder {
   border-radius: var(--radius-md);
-  background: rgba(255, 93, 143, 0.16);
-  border: 2px dashed rgba(255, 93, 143, 0.32);
-  box-shadow: inset 0 0 0 1px rgba(61, 218, 215, 0.2);
+  background: rgba(0, 86, 179, 0.12);
+  border: 2px dashed rgba(255, 186, 8, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(0, 86, 179, 0.22);
 }
 
 .product-card:hover:not([aria-disabled="true"]),
 .product-card:focus-visible:not([aria-disabled="true"]) {
   transform: translateY(-4px);
-  outline: 3px solid rgba(61, 218, 215, 0.55);
+  outline: 3px solid rgba(0, 86, 179, 0.5);
   outline-offset: 4px;
 }
 
@@ -279,7 +283,195 @@ body {
 }
 
 .product-card.found img {
-  filter: grayscale(0.1) drop-shadow(0 5px 10px rgba(15, 23, 42, 0.18));
+  filter: grayscale(0.15) drop-shadow(0 5px 10px rgba(0, 70, 140, 0.18));
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 1000;
+}
+
+.modal[hidden] {
+  display: none;
+}
+
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 33, 78, 0.45);
+  backdrop-filter: blur(3px);
+  cursor: pointer;
+}
+
+.modal-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: min(440px, 90vw);
+  padding: 28px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(243, 248, 255, 0.94) 55%,
+    rgba(255, 244, 214, 0.92) 100%
+  );
+  border: 1px solid rgba(0, 86, 179, 0.18);
+  box-shadow: 0 28px 60px -32px rgba(0, 42, 94, 0.55);
+}
+
+.modal-content[data-result="win"] .modal-title {
+  color: var(--accent);
+}
+
+.modal-content[data-result="lose"] .modal-title {
+  color: var(--accent-alt-dark);
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 86, 179, 0.08);
+  color: var(--accent-dark);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.modal-close:hover,
+.modal-close:focus-visible {
+  outline: none;
+  background: rgba(255, 186, 8, 0.35);
+  color: var(--accent);
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-body h2 {
+  margin: 0;
+  font-size: 1.65rem;
+}
+
+.modal-body p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.modal-summary {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.modal-summary li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  background: rgba(0, 86, 179, 0.08);
+  color: var(--accent-dark);
+}
+
+.modal-summary li::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.modal-summary li.found {
+  background: rgba(0, 86, 179, 0.12);
+  color: var(--accent-dark);
+}
+
+.modal-summary li.found::before {
+  background: var(--accent);
+}
+
+.modal-summary li.missing {
+  background: rgba(214, 40, 40, 0.12);
+  color: var(--accent-alt-dark);
+}
+
+.modal-summary li.missing::before {
+  background: var(--accent-alt-dark);
+}
+
+.modal-summary-name {
+  flex: 1;
+}
+
+.modal-summary-status {
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.modal-summary li.found .modal-summary-status {
+  color: var(--accent);
+}
+
+.modal-summary li.missing .modal-summary-status {
+  color: var(--accent-alt-dark);
+}
+
+.modal-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.modal-actions .primary-button {
+  margin-top: 0;
+  align-self: center;
+}
+
+.ghost-button {
+  border: 1px solid rgba(0, 86, 179, 0.35);
+  border-radius: 999px;
+  padding: 12px 20px;
+  background: transparent;
+  color: var(--accent-dark);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.ghost-button:hover,
+.ghost-button:focus-visible {
+  outline: none;
+  background: rgba(0, 86, 179, 0.1);
+  border-color: rgba(0, 86, 179, 0.5);
+  color: var(--accent);
+}
+
+.ghost-button:active {
+  transform: translateY(0.5px);
 }
 
 @keyframes wiggle {
