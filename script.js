@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const TIME_LIMIT = 20;
+  const DEFAULT_TIME_LIMIT = 20;
   const SHOPPING_LIST_SIZE = 5;
 
   const ALL_PRODUCTS = [
@@ -25,29 +25,50 @@ document.addEventListener('DOMContentLoaded', () => {
   const timerValueElement = document.querySelector('#timer-value');
   const restartButton = document.querySelector('#restart-btn');
   const productsContainer = document.querySelector('#products');
+  const timerInput = document.querySelector('#timer-input');
+  const cartStackElement = document.querySelector('#cart-stack');
 
   let targets = [];
   let targetIds = new Set();
   let foundTargets = new Set();
-  let timeRemaining = TIME_LIMIT;
+  let timeRemaining = DEFAULT_TIME_LIMIT;
   let countdownId = null;
   let isGameActive = false;
 
   restartButton.addEventListener('click', initializeGame);
 
+  if (timerInput) {
+    timerInput.addEventListener('change', () => {
+      const sanitizedTime = getConfiguredTimeLimit();
+      if (!isGameActive) {
+        timeRemaining = sanitizedTime;
+        updateTimerDisplay();
+      }
+    });
+
+    timerInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        initializeGame();
+      }
+    });
+  }
+
   initializeGame();
 
   function initializeGame() {
     clearInterval(countdownId);
+    countdownId = null;
     targets = getRandomProducts(ALL_PRODUCTS, SHOPPING_LIST_SIZE);
     targetIds = new Set(targets.map((item) => item.id));
     foundTargets = new Set();
-    timeRemaining = TIME_LIMIT;
+    timeRemaining = getConfiguredTimeLimit();
     isGameActive = true;
 
     updateTimerDisplay();
     renderShoppingList();
     renderProducts();
+    resetCartStack();
     updateStatus('Clique nos produtos da lista para adicioná-los ao carrinho.');
 
     startCountdown();
@@ -111,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (targetIds.has(productId)) {
       foundTargets.add(productId);
       markButtonsAsFound(productId);
+      addProductToCart(productId);
 
       const listItem = shoppingListElement.querySelector(`li[data-product-id="${productId}"]`);
       if (listItem) {
@@ -130,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function startCountdown() {
+    clearInterval(countdownId);
     countdownId = window.setInterval(() => {
       timeRemaining -= 1;
       updateTimerDisplay();
@@ -147,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     isGameActive = false;
     clearInterval(countdownId);
+    countdownId = null;
 
     if (!playerWon && timeRemaining < 0) {
       timeRemaining = 0;
@@ -211,6 +235,64 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state === 'error') {
       statusTextElement.classList.add('error');
     }
+  }
+
+  function getConfiguredTimeLimit() {
+    if (!timerInput) {
+      return DEFAULT_TIME_LIMIT;
+    }
+
+    const parsed = Number.parseInt(timerInput.value, 10);
+    const min = Number.parseInt(timerInput.min, 10);
+    const max = Number.parseInt(timerInput.max, 10);
+
+    let sanitized = Number.isFinite(parsed) ? parsed : DEFAULT_TIME_LIMIT;
+
+    if (Number.isFinite(min)) {
+      sanitized = Math.max(sanitized, min);
+    } else {
+      sanitized = Math.max(sanitized, 1);
+    }
+
+    if (Number.isFinite(max)) {
+      sanitized = Math.min(sanitized, max);
+    }
+
+    if (!Number.isFinite(sanitized) || sanitized <= 0) {
+      sanitized = DEFAULT_TIME_LIMIT;
+    }
+
+    timerInput.value = sanitized.toString();
+    return sanitized;
+  }
+
+  function resetCartStack() {
+    if (!cartStackElement) {
+      return;
+    }
+    cartStackElement.innerHTML = '';
+  }
+
+  function addProductToCart(productId) {
+    if (!cartStackElement) {
+      return;
+    }
+    const product = ALL_PRODUCTS.find((item) => item.id === productId);
+    if (!product) {
+      return;
+    }
+
+    const cartItem = document.createElement('img');
+    cartItem.src = product.image;
+    cartItem.alt = '';
+    cartItem.loading = 'lazy';
+    cartItem.setAttribute('aria-hidden', 'true');
+
+    const stackIndex = cartStackElement.childElementCount;
+    cartItem.style.setProperty('--stack-index', stackIndex.toString());
+    cartItem.style.zIndex = (stackIndex + 1).toString();
+
+    cartStackElement.append(cartItem);
   }
 
   function getRandomProducts(products, amount) {
