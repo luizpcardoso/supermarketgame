@@ -100,6 +100,10 @@ body.modal-open {
   min-height: 0;
 }
 
+.panel.shelf-panel {
+  justify-content: center;
+}
+
 .panel h2 {
   margin: 0;
   font-size: 1.4rem;
@@ -217,23 +221,25 @@ body.modal-open {
 }
 
 .shelf {
-  flex: 1;
-  padding: 24px;
-  border-radius: var(--radius-lg);
-  background: url("imagens/prateleira-imagem-de-fundo.jpeg") center/cover no-repeat;
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  min-height: 0;
+ 
+  background-color: #d62828;
+}
+
+.grid-container{
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    background: url("imagens/prateleira-imagem-de-fundo.jpeg") center/cover no-repeat;
+    padding:  10%;
+    
 }
 
 .shelf-grid {
+height: 100%;
+width: 100%;
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   grid-template-rows: repeat(5, minmax(0, 1fr));
-  gap: 16px;
-  width: 100%;
-  height: 100%;
+
 }
 
 .product-card {
@@ -248,6 +254,7 @@ body.modal-open {
   transition: transform 0.15s ease, filter 0.2s ease;
   width: 100%;
   height: 100%;
+  padding: 10px;
 }
 
 .product-card.missed {
@@ -516,13 +523,11 @@ body.modal-open {
   }
 
   .shelf {
-    min-height: 460px;
-    padding: 22px 16px;
-  }
-
-  .shelf-grid {
-    gap: 12px;
-    height: auto;
+    min-height: 0;
+    --shelf-horizontal-padding: 16;
+    --shelf-vertical-padding: 22;
+    --shelf-column-gap: 12;
+    --shelf-row-gap: 12;
   }
 }
 
@@ -532,7 +537,8 @@ body.modal-open {
   }
 
   .shelf {
-    padding: 20px 12px;
+    --shelf-horizontal-padding: 12;
+    --shelf-vertical-padding: 20;
   }
 
   .product-card {
