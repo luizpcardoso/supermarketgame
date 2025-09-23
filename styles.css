@@ -1,0 +1,321 @@
+:root {
+  --bg-color: #f3f6fb;
+  --text-color: #0f2a43;
+  --accent-color: #f09c2f;
+  --accent-strong: #d87a05;
+  --success-color: #2e9d61;
+  --error-color: #d64550;
+  --card-bg: #ffffff;
+  --shadow-color: rgba(15, 42, 67, 0.12);
+  --shadow-strong: rgba(15, 42, 67, 0.18);
+  --transition: 0.25s ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Poppins", "Segoe UI", Roboto, sans-serif;
+  color: var(--text-color);
+  background: radial-gradient(circle at top, #f9fbff 0%, var(--bg-color) 55%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 3rem);
+  line-height: 1.5;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: clamp(1.2rem, 3vw, 2.5rem);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(1.9rem, 3vw + 1rem, 2.9rem);
+  letter-spacing: 0.04em;
+  color: var(--text-color);
+}
+
+.game {
+  width: min(1100px, 100%);
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: clamp(1rem, 3vw, 3rem);
+}
+
+.sidebar {
+  flex: 0 0 clamp(200px, 18vw, 240px);
+  background: var(--card-bg);
+  border-radius: 18px;
+  padding: clamp(1.2rem, 3vw, 1.8rem);
+  box-shadow: 0 18px 38px var(--shadow-color);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sidebar h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-strong);
+}
+
+.shelf-area {
+  position: relative;
+  flex: 1 1 0;
+  width: 100%;
+  max-width: 680px;
+  min-height: 520px;
+  background: url("imagens/prateleira-imagem-de-fundo.jpeg") center/cover no-repeat;
+  border-radius: 22px;
+  box-shadow: 0 25px 45px var(--shadow-color);
+  overflow: hidden;
+  padding: clamp(0.85rem, 1.6vw, 1.4rem);
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.products {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: repeat(5, 1fr);
+  gap: clamp(0.45rem, 1vw, 0.85rem);
+}
+
+.product {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.35rem, 0.9vw, 0.75rem);
+  border: none;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  box-shadow: 0 12px 26px var(--shadow-strong);
+  transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+}
+
+.product img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.product:hover {
+  transform: scale(1.05);
+  box-shadow: 0 18px 34px rgba(15, 42, 67, 0.22);
+}
+
+.product:focus-visible {
+  transform: scale(1.05);
+  box-shadow: 0 18px 34px rgba(15, 42, 67, 0.24);
+  outline: 3px solid rgba(240, 156, 47, 0.45);
+  outline-offset: 4px;
+}
+
+.product.found {
+  filter: grayscale(0.75) brightness(1.05);
+  box-shadow: 0 0 0 3px rgba(46, 157, 97, 0.45);
+}
+
+.product.found,
+.product:disabled {
+  cursor: default;
+  pointer-events: none;
+}
+
+.product:disabled {
+  box-shadow: 0 8px 18px rgba(15, 42, 67, 0.18);
+}
+
+.product:disabled img {
+  opacity: 0.85;
+}
+
+.product.wrong {
+  animation: wiggle 0.35s ease;
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  30% {
+    transform: translateX(-8px);
+  }
+  60% {
+    transform: translateX(8px);
+  }
+}
+
+.shopping-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.shopping-list li {
+  padding: 0.55rem 0.65rem 0.55rem 1.8rem;
+  border-radius: 14px;
+  background: rgba(240, 156, 47, 0.12);
+  position: relative;
+  font-weight: 600;
+}
+
+.shopping-list li::before {
+  content: "";
+  position: absolute;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--accent-color);
+  top: 50%;
+  left: 0.65rem;
+  transform: translateY(-50%);
+}
+
+.shopping-list li.found {
+  background: rgba(46, 157, 97, 0.12);
+  color: var(--success-color);
+  text-decoration: line-through;
+}
+
+.shopping-list li.missed {
+  background: rgba(214, 69, 80, 0.12);
+  color: var(--error-color);
+}
+
+.status-text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(15, 42, 67, 0.8);
+  min-height: 3em;
+}
+
+.status-text.success {
+  color: var(--success-color);
+}
+
+.status-text.error {
+  color: var(--error-color);
+}
+
+.timer-area {
+  align-items: center;
+  text-align: center;
+}
+
+.timer-display {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2675f8, #47b5ff);
+  color: #ffffff;
+  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 1.1rem;
+  min-height: 120px;
+  box-shadow: 0 18px 36px rgba(38, 117, 248, 0.35);
+  transition: background var(--transition);
+}
+
+.timer-display.warning {
+  background: linear-gradient(135deg, #f15b5b, #f09c2f);
+}
+
+#timer-value {
+  display: inline-block;
+  min-width: 2ch;
+}
+
+.restart-button {
+  margin-top: auto;
+  background: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 0.9rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 12px 26px rgba(240, 156, 47, 0.35);
+  transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+}
+
+.restart-button:hover,
+.restart-button:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 32px rgba(240, 156, 47, 0.45);
+  outline: none;
+}
+
+.restart-button:active {
+  transform: translateY(0);
+}
+
+.restart-button:focus-visible {
+  outline: 3px solid rgba(240, 156, 47, 0.4);
+  outline-offset: 3px;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(15, 42, 67, 0.6);
+}
+
+@media (max-width: 1100px) {
+  .game {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .sidebar {
+    width: min(420px, 100%);
+  }
+
+  .shelf-area {
+    width: min(100%, 520px);
+  }
+
+  .timer-area {
+    order: 3;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 1.5rem 1rem;
+  }
+
+  .sidebar {
+    gap: 0.8rem;
+  }
+
+  .shelf-area {
+    min-height: 440px;
+    border-radius: 16px;
+  }
+
+  .product {
+    width: clamp(64px, 18vw, 90px);
+  }
+}
