@@ -26,6 +26,7 @@ const timerElement = document.getElementById("timer");
 const statusMessage = document.getElementById("status-message");
 const startButton = document.getElementById("start-button");
 const timeInput = document.getElementById("time-input");
+const startButtonDefaultLabel = startButton.textContent.trim();
 
 let activeTargets = [];
 let foundTargets = new Set();
@@ -33,6 +34,14 @@ let roundInterval = null;
 let roundDuration = DEFAULT_DURATION;
 let timeRemaining = DEFAULT_DURATION;
 let roundActive = false;
+
+function setRoundControlsActive(isActive) {
+  startButton.disabled = isActive;
+  startButton.textContent = isActive
+    ? "Rodada em andamento..."
+    : startButtonDefaultLabel;
+  timeInput.disabled = isActive;
+}
 
 function shuffle(array) {
   const copy = [...array];
@@ -67,6 +76,15 @@ function renderShoppingList() {
     item.textContent = product.name;
     shoppingList.appendChild(item);
   });
+}
+
+function renderShelfPlaceholders() {
+  shelfGrid.innerHTML = "";
+  for (let i = 0; i < TOTAL_SLOTS; i += 1) {
+    const placeholder = document.createElement("div");
+    placeholder.className = "product-placeholder";
+    shelfGrid.appendChild(placeholder);
+  }
 }
 
 function renderShelf() {
@@ -109,11 +127,16 @@ function updateTimerDisplay() {
 }
 
 function startRound() {
+  if (roundActive) {
+    return;
+  }
+
   const duration = sanitizeDuration(timeInput.value);
   timeInput.value = duration;
 
   prepareRound(duration);
   roundActive = true;
+  setRoundControlsActive(true);
   const secondsLabel = duration === 1 ? "1 segundo" : `${duration} segundos`;
   statusMessage.textContent = `Boa sorte! Você tem ${secondsLabel}.`;
 
@@ -183,6 +206,7 @@ function finishRound(playerWon) {
   roundInterval = null;
   timeRemaining = Math.max(timeRemaining, 0);
   updateTimerDisplay();
+  setRoundControlsActive(false);
 
   const message = playerWon
     ? "Parabéns! Você encontrou todos os itens a tempo."
@@ -205,6 +229,7 @@ timeInput.addEventListener("change", () => {
   timeInput.value = sanitized;
 
   if (!roundActive) {
+    roundDuration = sanitized;
     timeRemaining = sanitized;
     updateTimerDisplay();
   }
@@ -222,4 +247,10 @@ function sanitizeDuration(rawValue) {
 
 const initialDuration = sanitizeDuration(timeInput.value || DEFAULT_DURATION);
 timeInput.value = initialDuration;
-prepareRound(initialDuration);
+roundDuration = initialDuration;
+timeRemaining = initialDuration;
+updateTimerDisplay();
+renderShelfPlaceholders();
+statusMessage.textContent =
+  'Defina a duração da rodada e clique em "Iniciar jogo" para começar.';
+setRoundControlsActive(false);
