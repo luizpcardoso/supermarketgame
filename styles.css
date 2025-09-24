@@ -477,6 +477,28 @@ width: 100%;
   transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
+.toggle-button {
+  align-self: stretch;
+  text-align: center;
+}
+
+.toggle-button[aria-pressed="true"],
+.toggle-button.is-active {
+  background: linear-gradient(135deg, var(--accent) 0%, #1f6de4 42%, var(--accent-alt) 100%);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 12px 24px -16px rgba(0, 86, 179, 0.55);
+}
+
+.toggle-button[aria-pressed="true"]:hover,
+.toggle-button[aria-pressed="true"]:focus-visible,
+.toggle-button.is-active:hover,
+.toggle-button.is-active:focus-visible {
+  background: linear-gradient(135deg, var(--accent) 0%, #1f6de4 42%, var(--accent-alt) 100%);
+  color: #fff;
+  border-color: transparent;
+}
+
 .ghost-button:hover,
 .ghost-button:focus-visible {
   outline: none;

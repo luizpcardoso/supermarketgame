@@ -26,6 +26,7 @@ const timerElement = document.getElementById("timer");
 const statusMessage = document.getElementById("status-message");
 const startButton = document.getElementById("start-button");
 const timeInput = document.getElementById("time-input");
+const organizeButton = document.getElementById("organize-button");
 const resultModal = document.getElementById("result-modal");
 const modalContent = document.getElementById("modal-content");
 const modalTitle = document.getElementById("modal-title");
@@ -41,6 +42,7 @@ let roundInterval = null;
 let roundDuration = DEFAULT_DURATION;
 let timeRemaining = DEFAULT_DURATION;
 let roundActive = false;
+let shouldOrganizeProducts = false;
 
 function setRoundControlsActive(isActive) {
   startButton.disabled = isActive;
@@ -48,6 +50,9 @@ function setRoundControlsActive(isActive) {
     ? "Rodada em andamento..."
     : startButtonDefaultLabel;
   timeInput.disabled = isActive;
+  if (organizeButton) {
+    organizeButton.disabled = isActive;
+  }
 }
 
 function shuffle(array) {
@@ -57,6 +62,38 @@ function shuffle(array) {
     [copy[i], copy[j]] = [copy[j], copy[i]];
   }
   return copy;
+}
+
+function chooseGroupSize({ slotsLeft, minSize, maxSize }) {
+  const safeMin = Math.min(Math.max(1, minSize), slotsLeft);
+  const safeMax = Math.max(safeMin, Math.min(slotsLeft, maxSize));
+  const candidates = [];
+
+  for (let size = safeMin; size <= safeMax; size += 1) {
+    if (size > slotsLeft) {
+      continue;
+    }
+    const leavesSingleSlot = slotsLeft - size === 1;
+    if (leavesSingleSlot && size !== slotsLeft) {
+      continue;
+    }
+    candidates.push(size);
+  }
+
+  if (candidates.length === 0) {
+    for (let size = safeMax; size >= 1; size -= 1) {
+      if (size <= slotsLeft) {
+        candidates.push(size);
+        break;
+      }
+    }
+  }
+
+  if (candidates.length === 0) {
+    candidates.push(1);
+  }
+
+  return shuffle(candidates)[0];
 }
 
 function prepareRound(duration = roundDuration) {
@@ -85,19 +122,174 @@ function renderShoppingList() {
   });
 }
 
-function renderShelf() {
-  const requiredItems = activeTargets.map((product) => ({ ...product }));
-  const slots = [...requiredItems];
+function createRandomSlots(requiredItems) {
+  const slots = requiredItems.map((product) => ({ ...product }));
 
   while (slots.length < TOTAL_SLOTS) {
     const randomProduct = PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)];
     slots.push(randomProduct);
   }
 
-  const shuffledSlots = shuffle(slots);
+  return shuffle(slots);
+}
+
+function createOrganizedSlots(requiredItems) {
+  const productMap = new Map(PRODUCTS.map((product) => [product.id, product]));
+  const uniqueRequiredIds = Array.from(
+    new Set(requiredItems.map((product) => product.id))
+  );
+  const uniqueRequiredProducts = shuffle(
+    uniqueRequiredIds.map((id) => productMap.get(id)).filter(Boolean)
+  );
+  let pendingRequired = [...uniqueRequiredProducts];
+
+  const optionalCandidates = PRODUCTS.filter(
+    (product) => !uniqueRequiredIds.includes(product.id)
+  );
+  const baseOptionalPool =
+    optionalCandidates.length > 0 ? optionalCandidates : PRODUCTS;
+  let optionalPool = shuffle(baseOptionalPool);
+  if (optionalPool.length === 0) {
+    optionalPool = shuffle(PRODUCTS);
+  }
+  let optionalCycleCounter = 0;
+
+  const takeOptionalProduct = (blockedIds = []) => {
+    if (optionalPool.length === 0) {
+      optionalPool = shuffle(
+        baseOptionalPool.length > 0 ? baseOptionalPool : PRODUCTS
+      );
+    }
+
+    const poolLength = optionalPool.length;
+    let index = optionalPool.findIndex(
+      (product) => !blockedIds.includes(product.id)
+    );
+    if (index === -1) {
+      index = 0;
+    }
+
+    const [product] = optionalPool.splice(index, 1);
+    optionalPool.push(product);
+    optionalCycleCounter += 1;
+    if (optionalCycleCounter >= poolLength) {
+      optionalCycleCounter = 0;
+      optionalPool = shuffle(optionalPool);
+    }
+
+    return product;
+  };
+
+  const slots = [];
+
+  let previousRowLastProductId = null;
+
+  for (let rowIndex = 0; rowIndex < GRID_ROWS; rowIndex += 1) {
+    let slotsLeft = GRID_COLUMNS;
+    const rowProducts = [];
+
+    while (slotsLeft > 0) {
+      const rowsRemainingAfterCurrent = GRID_ROWS - rowIndex - 1;
+
+      if (slotsLeft === 1) {
+        if (pendingRequired.length > rowsRemainingAfterCurrent) {
+          const requiredProduct = pendingRequired.shift();
+          rowProducts.push(
+            requiredProduct ||
+              takeOptionalProduct(
+                previousRowLastProductId ? [previousRowLastProductId] : []
+              )
+          );
+        } else if (rowProducts.length > 0) {
+          rowProducts.push(rowProducts[rowProducts.length - 1]);
+        } else {
+          const blocked = previousRowLastProductId
+            ? [previousRowLastProductId]
+            : [];
+          rowProducts.push(takeOptionalProduct(blocked));
+        }
+        slotsLeft -= 1;
+        continue;
+      }
+
+      let useRequired = false;
+      if (pendingRequired.length > 0) {
+        if (rowProducts.length === 0) {
+          useRequired = true;
+        } else if (pendingRequired.length > rowsRemainingAfterCurrent) {
+          useRequired = true;
+        }
+      }
+
+      let product = null;
+      if (useRequired) {
+        product = pendingRequired.shift() || null;
+      }
+
+      if (!product) {
+        const blockedIds = [];
+        if (rowProducts.length > 0) {
+          blockedIds.push(rowProducts[rowProducts.length - 1].id);
+        } else if (previousRowLastProductId) {
+          blockedIds.push(previousRowLastProductId);
+        }
+        product = takeOptionalProduct(blockedIds);
+      }
+
+      if (!product) {
+        product = PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)];
+      }
+
+      const pendingAfter = pendingRequired.length;
+      const maxAllowedByPending = Math.max(
+        1,
+        slotsLeft + rowsRemainingAfterCurrent * GRID_COLUMNS - pendingAfter
+      );
+      let maxGroup = Math.max(1, Math.min(slotsLeft, maxAllowedByPending));
+      maxGroup = Math.max(1, Math.min(maxGroup, Math.min(slotsLeft, 5)));
+
+      let minGroup = useRequired ? 2 : 2;
+      if (slotsLeft <= 2) {
+        minGroup = 1;
+      }
+      minGroup = Math.min(Math.max(minGroup, 1), maxGroup);
+
+      const groupSize = chooseGroupSize({
+        slotsLeft,
+        minSize: minGroup,
+        maxSize: maxGroup,
+      });
+
+      for (let i = 0; i < groupSize && slotsLeft > 0; i += 1) {
+        rowProducts.push(product);
+        slotsLeft -= 1;
+      }
+    }
+
+    slots.push(...rowProducts);
+    if (rowProducts.length > 0) {
+      previousRowLastProductId = rowProducts[rowProducts.length - 1].id;
+    } else {
+      previousRowLastProductId = null;
+    }
+  }
+
+  while (slots.length < TOTAL_SLOTS) {
+    slots.push(PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)]);
+  }
+
+  return slots;
+}
+
+function renderShelf() {
+  const requiredItems = activeTargets.map((product) => ({ ...product }));
+  const slots = shouldOrganizeProducts
+    ? createOrganizedSlots(requiredItems)
+    : createRandomSlots(requiredItems);
+
   shelfGrid.innerHTML = "";
 
-  shuffledSlots.forEach((product) => {
+  slots.forEach((product) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "product-card";
@@ -112,6 +304,18 @@ function renderShelf() {
     button.addEventListener("click", handleProductClick);
     shelfGrid.appendChild(button);
   });
+}
+
+function updateOrganizeButtonState() {
+  if (!organizeButton) {
+    return;
+  }
+
+  organizeButton.setAttribute("aria-pressed", shouldOrganizeProducts ? "true" : "false");
+  organizeButton.classList.toggle("is-active", shouldOrganizeProducts);
+  organizeButton.textContent = shouldOrganizeProducts
+    ? "Organizar produtos (ativo)"
+    : "Organizar produtos";
 }
 
 function updateTimerDisplay() {
@@ -304,6 +508,23 @@ startButton.addEventListener("click", () => {
   startRound();
 });
 
+if (organizeButton) {
+  organizeButton.addEventListener("click", () => {
+    if (roundActive) {
+      return;
+    }
+
+    shouldOrganizeProducts = !shouldOrganizeProducts;
+    updateOrganizeButtonState();
+    renderShelf();
+
+    const organizeMessage = shouldOrganizeProducts
+      ? "Modo organizado ativo! Os produtos idênticos agora aparecem agrupados."
+      : "Modo organizado desativado. A prateleira voltará a ser aleatória.";
+    statusMessage.textContent = organizeMessage;
+  });
+}
+
 timeInput.addEventListener("change", () => {
   const sanitized = sanitizeDuration(timeInput.value);
   timeInput.value = sanitized;
@@ -350,6 +571,7 @@ timeInput.value = initialDuration;
 roundDuration = initialDuration;
 timeRemaining = initialDuration;
 updateTimerDisplay();
+updateOrganizeButtonState();
 renderShelf();
 statusMessage.textContent =
   'Defina a duração da rodada e clique em "Iniciar jogo" para começar.';
