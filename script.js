@@ -85,15 +85,6 @@ function renderShoppingList() {
   });
 }
 
-function renderShelfPlaceholders() {
-  shelfGrid.innerHTML = "";
-  for (let i = 0; i < TOTAL_SLOTS; i += 1) {
-    const placeholder = document.createElement("div");
-    placeholder.className = "product-placeholder";
-    shelfGrid.appendChild(placeholder);
-  }
-}
-
 function renderShelf() {
   const requiredItems = activeTargets.map((product) => ({ ...product }));
   const slots = [...requiredItems];
@@ -359,7 +350,7 @@ timeInput.value = initialDuration;
 roundDuration = initialDuration;
 timeRemaining = initialDuration;
 updateTimerDisplay();
-renderShelfPlaceholders();
+renderShelf();
 statusMessage.textContent =
   'Defina a duração da rodada e clique em "Iniciar jogo" para começar.';
 setRoundControlsActive(false);
