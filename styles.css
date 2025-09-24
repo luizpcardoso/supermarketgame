@@ -605,6 +605,7 @@ width: 100%;
     padding: 6px 4px 10px;
     list-style: none;
     display: flex;
+    flex-direction: row;
     flex-wrap: nowrap;
     gap: 10px;
     width: 100%;
