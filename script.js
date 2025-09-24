@@ -26,6 +26,7 @@ const timerElement = document.getElementById("timer");
 const statusMessage = document.getElementById("status-message");
 const startButton = document.getElementById("start-button");
 const timeInput = document.getElementById("time-input");
+const organizeButton = document.getElementById("organize-button");
 const resultModal = document.getElementById("result-modal");
 const modalContent = document.getElementById("modal-content");
 const modalTitle = document.getElementById("modal-title");
@@ -41,6 +42,7 @@ let roundInterval = null;
 let roundDuration = DEFAULT_DURATION;
 let timeRemaining = DEFAULT_DURATION;
 let roundActive = false;
+let shouldOrganizeProducts = false;
 
 function setRoundControlsActive(isActive) {
   startButton.disabled = isActive;
@@ -48,6 +50,9 @@ function setRoundControlsActive(isActive) {
     ? "Rodada em andamento..."
     : startButtonDefaultLabel;
   timeInput.disabled = isActive;
+  if (organizeButton) {
+    organizeButton.disabled = isActive;
+  }
 }
 
 function shuffle(array) {
@@ -85,19 +90,91 @@ function renderShoppingList() {
   });
 }
 
-function renderShelf() {
-  const requiredItems = activeTargets.map((product) => ({ ...product }));
-  const slots = [...requiredItems];
+function createRandomSlots(requiredItems) {
+  const slots = requiredItems.map((product) => ({ ...product }));
 
   while (slots.length < TOTAL_SLOTS) {
     const randomProduct = PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)];
     slots.push(randomProduct);
   }
 
-  const shuffledSlots = shuffle(slots);
+  return shuffle(slots);
+}
+
+function createOrganizedSlots(requiredItems) {
+  const requiredSet = new Set(requiredItems.map((product) => product.id));
+  const requiredList = shuffle(
+    PRODUCTS.filter((product) => requiredSet.has(product.id))
+  );
+  const optionalList = shuffle(
+    PRODUCTS.filter((product) => !requiredSet.has(product.id))
+  );
+
+  let groupOrder = [...requiredList, ...optionalList];
+
+  if (groupOrder.length === 0) {
+    return [];
+  }
+
+  if (groupOrder.length > TOTAL_SLOTS) {
+    const optionalLimit = Math.max(0, TOTAL_SLOTS - requiredList.length);
+    groupOrder = [
+      ...requiredList,
+      ...optionalList.slice(0, optionalLimit),
+    ];
+  }
+
+  const baseGroupSize = Math.max(
+    1,
+    Math.floor(TOTAL_SLOTS / groupOrder.length)
+  );
+
+  const groupSizes = groupOrder.map(() => baseGroupSize);
+  let usedSlots = baseGroupSize * groupOrder.length;
+
+  if (usedSlots < TOTAL_SLOTS) {
+    let extra = TOTAL_SLOTS - usedSlots;
+    const indices = shuffle(groupSizes.map((_, index) => index));
+    let index = 0;
+    while (extra > 0 && indices.length > 0) {
+      const targetIndex = indices[index % indices.length];
+      groupSizes[targetIndex] += 1;
+      extra -= 1;
+      index += 1;
+    }
+  }
+
+  const groups = groupOrder.map((product, index) => ({
+    product,
+    size: groupSizes[index],
+  }));
+
+  const orderedGroups = shuffle(groups);
+  const slots = [];
+
+  orderedGroups.forEach(({ product, size }) => {
+    for (let i = 0; i < size && slots.length < TOTAL_SLOTS; i += 1) {
+      slots.push(product);
+    }
+  });
+
+  while (slots.length < TOTAL_SLOTS) {
+    const fallbackGroup = orderedGroups[orderedGroups.length - 1];
+    slots.push(fallbackGroup.product);
+  }
+
+  return slots;
+}
+
+function renderShelf() {
+  const requiredItems = activeTargets.map((product) => ({ ...product }));
+  const slots = shouldOrganizeProducts
+    ? createOrganizedSlots(requiredItems)
+    : createRandomSlots(requiredItems);
+
   shelfGrid.innerHTML = "";
 
-  shuffledSlots.forEach((product) => {
+  slots.forEach((product) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "product-card";
@@ -112,6 +189,18 @@ function renderShelf() {
     button.addEventListener("click", handleProductClick);
     shelfGrid.appendChild(button);
   });
+}
+
+function updateOrganizeButtonState() {
+  if (!organizeButton) {
+    return;
+  }
+
+  organizeButton.setAttribute("aria-pressed", shouldOrganizeProducts ? "true" : "false");
+  organizeButton.classList.toggle("is-active", shouldOrganizeProducts);
+  organizeButton.textContent = shouldOrganizeProducts
+    ? "Organizar produtos (ativo)"
+    : "Organizar produtos";
 }
 
 function updateTimerDisplay() {
@@ -304,6 +393,23 @@ startButton.addEventListener("click", () => {
   startRound();
 });
 
+if (organizeButton) {
+  organizeButton.addEventListener("click", () => {
+    if (roundActive) {
+      return;
+    }
+
+    shouldOrganizeProducts = !shouldOrganizeProducts;
+    updateOrganizeButtonState();
+    renderShelf();
+
+    const organizeMessage = shouldOrganizeProducts
+      ? "Modo organizado ativo! Os produtos idênticos agora aparecem agrupados."
+      : "Modo organizado desativado. A prateleira voltará a ser aleatória.";
+    statusMessage.textContent = organizeMessage;
+  });
+}
+
 timeInput.addEventListener("change", () => {
   const sanitized = sanitizeDuration(timeInput.value);
   timeInput.value = sanitized;
@@ -350,6 +456,7 @@ timeInput.value = initialDuration;
 roundDuration = initialDuration;
 timeRemaining = initialDuration;
 updateTimerDisplay();
+updateOrganizeButtonState();
 renderShelf();
 statusMessage.textContent =
   'Defina a duração da rodada e clique em "Iniciar jogo" para começar.';
