@@ -12,6 +12,36 @@ const PRODUCTS = [
   { id: "suco", name: "Suco", image: "imagens/suco.jpeg" }
 ];
 
+const ORGANIZED_LAYOUT = [
+  ["macarrao", "macarrao", "macarrao", "molho", "molho", "oleo", "oleo"],
+  ["suco", "suco", "suco", "aveia", "aveia", "aveia", "aveia"],
+  ["chips", "chips", "chips", "biscoito", "biscoito", "biscoito", "biscoito"],
+  [
+    "creme-dental",
+    "creme-dental",
+    "creme-dental",
+    "shampoo",
+    "shampoo",
+    "shampoo",
+    "shampoo"
+  ],
+  ["limpador", "limpador", "limpador", "sabao", "sabao", "sabao", "sabao"],
+];
+
+const ORGANIZED_FALLBACK_ROW_BY_PRODUCT = {
+  aveia: 1,
+  biscoito: 2,
+  chips: 2,
+  "creme-dental": 3,
+  limpador: 4,
+  macarrao: 0,
+  molho: 0,
+  oleo: 0,
+  sabao: 4,
+  shampoo: 3,
+  suco: 1,
+};
+
 const GRID_ROWS = 5;
 const GRID_COLUMNS = 7;
 const TOTAL_SLOTS = GRID_ROWS * GRID_COLUMNS;
@@ -64,38 +94,6 @@ function shuffle(array) {
   return copy;
 }
 
-function chooseGroupSize({ slotsLeft, minSize, maxSize }) {
-  const safeMin = Math.min(Math.max(1, minSize), slotsLeft);
-  const safeMax = Math.max(safeMin, Math.min(slotsLeft, maxSize));
-  const candidates = [];
-
-  for (let size = safeMin; size <= safeMax; size += 1) {
-    if (size > slotsLeft) {
-      continue;
-    }
-    const leavesSingleSlot = slotsLeft - size === 1;
-    if (leavesSingleSlot && size !== slotsLeft) {
-      continue;
-    }
-    candidates.push(size);
-  }
-
-  if (candidates.length === 0) {
-    for (let size = safeMax; size >= 1; size -= 1) {
-      if (size <= slotsLeft) {
-        candidates.push(size);
-        break;
-      }
-    }
-  }
-
-  if (candidates.length === 0) {
-    candidates.push(1);
-  }
-
-  return shuffle(candidates)[0];
-}
-
 function prepareRound(duration = roundDuration) {
   clearInterval(roundInterval);
   roundInterval = null;
@@ -135,150 +133,42 @@ function createRandomSlots(requiredItems) {
 
 function createOrganizedSlots(requiredItems) {
   const productMap = new Map(PRODUCTS.map((product) => [product.id, product]));
-  const uniqueRequiredIds = Array.from(
-    new Set(requiredItems.map((product) => product.id))
-  );
-  const uniqueRequiredProducts = shuffle(
-    uniqueRequiredIds.map((id) => productMap.get(id)).filter(Boolean)
-  );
-  let pendingRequired = [...uniqueRequiredProducts];
+  const layout = ORGANIZED_LAYOUT.map((row) => [...row]);
+  const placedProducts = new Set(layout.flat());
 
-  const optionalCandidates = PRODUCTS.filter(
-    (product) => !uniqueRequiredIds.includes(product.id)
-  );
-  const baseOptionalPool =
-    optionalCandidates.length > 0 ? optionalCandidates : PRODUCTS;
-  let optionalPool = shuffle(baseOptionalPool);
-  if (optionalPool.length === 0) {
-    optionalPool = shuffle(PRODUCTS);
-  }
-  let optionalCycleCounter = 0;
-
-  const takeOptionalProduct = (blockedIds = []) => {
-    if (optionalPool.length === 0) {
-      optionalPool = shuffle(
-        baseOptionalPool.length > 0 ? baseOptionalPool : PRODUCTS
-      );
+  requiredItems.forEach((product) => {
+    if (!product || placedProducts.has(product.id)) {
+      return;
     }
 
-    const poolLength = optionalPool.length;
-    let index = optionalPool.findIndex(
-      (product) => !blockedIds.includes(product.id)
+    const fallbackRowIndex =
+      ORGANIZED_FALLBACK_ROW_BY_PRODUCT[product.id] ?? 0;
+    const targetRow = layout[fallbackRowIndex] || layout[0];
+
+    if (!targetRow || targetRow.length === 0) {
+      return;
+    }
+
+    targetRow[targetRow.length - 1] = product.id;
+    placedProducts.add(product.id);
+  });
+
+  const slots = layout.flat().map((productId) => {
+    if (productMap.has(productId)) {
+      return productMap.get(productId);
+    }
+
+    const fallbackProduct = requiredItems.find(
+      (product) => product && product.id === productId
     );
-    if (index === -1) {
-      index = 0;
-    }
+    return (
+      fallbackProduct ||
+      PRODUCTS.find((product) => product.id === productId) ||
+      PRODUCTS[0]
+    );
+  });
 
-    const [product] = optionalPool.splice(index, 1);
-    optionalPool.push(product);
-    optionalCycleCounter += 1;
-    if (optionalCycleCounter >= poolLength) {
-      optionalCycleCounter = 0;
-      optionalPool = shuffle(optionalPool);
-    }
-
-    return product;
-  };
-
-  const slots = [];
-
-  let previousRowLastProductId = null;
-
-  for (let rowIndex = 0; rowIndex < GRID_ROWS; rowIndex += 1) {
-    let slotsLeft = GRID_COLUMNS;
-    const rowProducts = [];
-
-    while (slotsLeft > 0) {
-      const rowsRemainingAfterCurrent = GRID_ROWS - rowIndex - 1;
-
-      if (slotsLeft === 1) {
-        if (pendingRequired.length > rowsRemainingAfterCurrent) {
-          const requiredProduct = pendingRequired.shift();
-          rowProducts.push(
-            requiredProduct ||
-              takeOptionalProduct(
-                previousRowLastProductId ? [previousRowLastProductId] : []
-              )
-          );
-        } else if (rowProducts.length > 0) {
-          rowProducts.push(rowProducts[rowProducts.length - 1]);
-        } else {
-          const blocked = previousRowLastProductId
-            ? [previousRowLastProductId]
-            : [];
-          rowProducts.push(takeOptionalProduct(blocked));
-        }
-        slotsLeft -= 1;
-        continue;
-      }
-
-      let useRequired = false;
-      if (pendingRequired.length > 0) {
-        if (rowProducts.length === 0) {
-          useRequired = true;
-        } else if (pendingRequired.length > rowsRemainingAfterCurrent) {
-          useRequired = true;
-        }
-      }
-
-      let product = null;
-      if (useRequired) {
-        product = pendingRequired.shift() || null;
-      }
-
-      if (!product) {
-        const blockedIds = [];
-        if (rowProducts.length > 0) {
-          blockedIds.push(rowProducts[rowProducts.length - 1].id);
-        } else if (previousRowLastProductId) {
-          blockedIds.push(previousRowLastProductId);
-        }
-        product = takeOptionalProduct(blockedIds);
-      }
-
-      if (!product) {
-        product = PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)];
-      }
-
-      const pendingAfter = pendingRequired.length;
-      const maxAllowedByPending = Math.max(
-        1,
-        slotsLeft + rowsRemainingAfterCurrent * GRID_COLUMNS - pendingAfter
-      );
-      let maxGroup = Math.max(1, Math.min(slotsLeft, maxAllowedByPending));
-      maxGroup = Math.max(1, Math.min(maxGroup, Math.min(slotsLeft, 5)));
-
-      let minGroup = useRequired ? 2 : 2;
-      if (slotsLeft <= 2) {
-        minGroup = 1;
-      }
-      minGroup = Math.min(Math.max(minGroup, 1), maxGroup);
-
-      const groupSize = chooseGroupSize({
-        slotsLeft,
-        minSize: minGroup,
-        maxSize: maxGroup,
-      });
-
-      for (let i = 0; i < groupSize && slotsLeft > 0; i += 1) {
-        rowProducts.push(product);
-        slotsLeft -= 1;
-      }
-    }
-
-    slots.push(...rowProducts);
-    if (rowProducts.length > 0) {
-      previousRowLastProductId = rowProducts[rowProducts.length - 1].id;
-    } else {
-      previousRowLastProductId = null;
-    }
-  }
-
-  while (slots.length < TOTAL_SLOTS) {
-    slots.push(PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)]);
-  }
-
-  return slots;
+  return slots.slice(0, TOTAL_SLOTS);
 }
 
 function renderShelf() {
